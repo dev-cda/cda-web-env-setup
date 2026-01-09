@@ -27,11 +27,12 @@ if [[ ! -d "$CDA_WEB_ENV_DIR" ]]; then
   mkdir -p "$CDA_WEB_ENV_DIR" 
   cd "$CDA_WEB_ENV_DIR" || exit 1
   echo "Instalando e descompactando Apache Tomcat..."
-  if [[ ! -d "$TOMCAT_NAME" ]]
-  curl -fLo "$TOMCAT_TAR" "$TOMCAT_URL"
-  tar -xzf "$TOMCAT_TAR"
-  rm "$TOMCAT_TAR"
-  chmod +x "$TOMCAT_NAME"/bin/*.sh
+  if [[ ! -d "$TOMCAT_NAME" ]]; then
+    curl -fLo "$TOMCAT_TAR" "$TOMCAT_URL"
+    tar -xzf "$TOMCAT_TAR"
+    rm "$TOMCAT_TAR"
+    chmod +x "$TOMCAT_NAME"/bin/*.sh
+  fi
 else
   echo "Diretório já existe!"
   cd "$CDA_WEB_ENV_DIR"
