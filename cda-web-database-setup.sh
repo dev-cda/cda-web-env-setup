@@ -5,6 +5,12 @@ set -eu
 check_port() {
     local port="$1"
 
+    # Verifica se a porta está sendo usada pelo docker, para evitar conflito
+    if ss -ltnp 2>/dev/null | grep ":$port " | grep -qi docker; then
+        echo "Porta $port já está sendo utilizada por um container Docker. OK."
+        return
+    fi
+
     if ss -ltn | grep -q ":$port "; then
         read -rp "Um serviço está utilizando a porta $port. Deseja desativá-lo? (s/N) " response
         response=${response,,}
@@ -40,15 +46,21 @@ fi
 $COMPOSE_CMD up -d
 
 echo -e "\n\e[1;32m===============================================\e[0m"
-echo -e "\e[1;32m   ✔ BANCO DE DADOS LOCAL DO CDA WEB INICIALIZADO\e[0m"
+echo -e "\e[1;32m✔ BANCO DE DADOS LOCAL DO CDA WEB INICIALIZADO\e[0m"
 echo -e "\e[1;32m===============================================\e[0m\n"
 
 echo -e "\e[1;34mBanco de dados PostgreSQL disponível via Docker\e[0m"
 echo -e "\e[1;37m• Host:\e[0m localhost"
 echo -e "\e[1;37m• Porta:\e[0m 5432\n"
+echo -e "Credenciais para o banco de dados local:\n"
+echo -e "\e[1;37m• user: admin\n"
+echo -e "\e[1;37m• senha: admin\n"
 
 echo -e "\e[1;34mAcesso ao pgAdmin4:\e[0m"
 echo -e "\e[1;37m• URL:\e[0m http://localhost:5050\n"
+echo -e "Credenciais para o pgAdmin4:\n"
+echo -e "\e[1;37m• login: admin@admin.com\n"
+echo -e "\e[1;37m• senha: admin\n"
 
-echo -e "\e[1;33mUse as credenciais definidas no docker-compose.yml\e[0m"
+echo -e "\e[1;33mTudo pronto.\e[0m"
 echo -e "\e[1;32mBom desenvolvimento! 🚀\e[0m\n"
