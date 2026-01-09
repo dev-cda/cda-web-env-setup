@@ -4,7 +4,6 @@ set -euo pipefail
 CDA_WEB_ENV_DIR="$HOME/cda-web-env-dir"
 
 TOMCAT_VERSION="10.1.50"
-TOMCAT_DIR="$CDA_WEB_ENV_DIR"
 TOMCAT_NAME="apache-tomcat-$TOMCAT_VERSION"
 TOMCAT_TAR="$TOMCAT_NAME.tar.gz"
 TOMCAT_URL="https://dlcdn.apache.org/tomcat/tomcat-10/v$TOMCAT_VERSION/bin/$TOMCAT_TAR"
@@ -21,25 +20,33 @@ CDA_WEB_REPORTS_MANAGER_BRANCH="update-for-tomcat-10"
 CDA_WEB_PROJECT_URL="https://github.com/dev-cda/cda-web.git"
 CDA_WEB_PROJECT_DIR="$CDA_WEB_ENV_DIR/cda-web"
 
+CDA_API_URL="https://github.com/dev-cda/cda-api.git"
+CDA_API_DIR="$CDA_WEB_ENV_DIR/cda-api"
+
+dir_not_exists() {
+  [[ ! -d $1 ]] 
+}
 
 echo "Criando diretório para ambiente do projeto..."
-if [[ ! -d "$CDA_WEB_ENV_DIR" ]]; then
+if dir_not_exists "$CDA_WEB_ENV_DIR"; then
   mkdir -p "$CDA_WEB_ENV_DIR" 
-  cd "$CDA_WEB_ENV_DIR" || exit 1
-  echo "Instalando e descompactando Apache Tomcat..."
-  if [[ ! -d "$TOMCAT_NAME" ]]; then
-    curl -fLo "$TOMCAT_TAR" "$TOMCAT_URL"
-    tar -xzf "$TOMCAT_TAR"
-    rm "$TOMCAT_TAR"
-    chmod +x "$TOMCAT_NAME"/bin/*.sh
-  fi
 else
   echo "Diretório já existe!"
-  cd "$CDA_WEB_ENV_DIR"
 fi
 
+cd "$CDA_WEB_ENV_DIR" || exit 1
+
+echo "Instalando e descompactando Apache Tomcat..."
+if dir_not_exists "$TOMCAT_NAME"; then
+  curl -fLo "$TOMCAT_TAR" "$TOMCAT_URL"
+  tar -xzf "$TOMCAT_TAR"
+  rm "$TOMCAT_TAR"
+fi
+
+chmod +x "$TOMCAT_NAME"/bin/*.sh
+
 echo "Instalando o SDKMAN! para instalação e gerenciamento do JDK e do Maven..."
-if [[ ! -d "$SDKMAN_DIR" ]]; then
+if dir_not_exists "$SDKMAN_DIR"; then
   curl -s "$SDKMAN_URL" | bash
 else
   echo "SDKMAN! já instalado"
@@ -76,7 +83,7 @@ else
 fi
 
 echo "Clonando o repositório do CDA Web Reports Manager(dependência do CDA Web)"
-if [[ ! -d cda-web-reports-manager ]]; then
+if dir_not_exists "$CDA_WEB_REPORTS_MANAGER_DIR"; then
   git clone "$CDA_WEB_REPORTS_MANAGER_URL"
 fi
 
@@ -86,7 +93,10 @@ git checkout "$CDA_WEB_REPORTS_MANAGER_BRANCH"
 mvn install -DskipTests=true
 cd "$CDA_WEB_ENV_DIR"
 
-if [[ ! -d "$CDA_WEB_PROJECT_DIR" ]]; then
-    git clone "$CDA_WEB_PROJECT_URL"
+if dir_not_exists "$CDA_WEB_PROJECT_DIR"; then
+  git clone "$CDA_WEB_PROJECT_URL"
 fi
     
+if dir_not_exists "$CDA_API_DIR"; then
+  git clone "$CDA_API_URL"
+fi
